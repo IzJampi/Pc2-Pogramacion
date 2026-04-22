@@ -1,0 +1,14 @@
+@model Pc2_Pogramacion.Models.Curso
+
+<h2>Crear Curso</h2>
+
+<form asp-action="Create">
+    <input asp-for="Nombre" placeholder="Nombre" />
+    <input asp-for="Codigo" placeholder="Código" />
+    <input asp-for="Creditos" type="number" />
+    <input asp-for="CupoMaximo" type="number" />
+    <input asp-for="HorarioInicio" type="datetime-local" />
+    <input asp-for="HorarioFin" type="datetime-local" />
+
+    <button type="submit">Guardar</button>
+</form>

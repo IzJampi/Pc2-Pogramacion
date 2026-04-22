@@ -1,0 +1,36 @@
+@model IEnumerable<Pc2_Pogramacion.Models.Curso>
+
+<h2>Catálogo de Cursos</h2>
+
+<form method="get">
+    <input type="text" name="nombre" placeholder="Nombre" />
+
+    <input type="number" name="minCreditos" placeholder="Créditos mín" />
+    <input type="number" name="maxCreditos" placeholder="Créditos máx" />
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Créditos</th>
+            <th>Horario</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var curso in Model)
+        {
+            <tr>
+                <td>@curso.Nombre</td>
+                <td>@curso.Creditos</td>
+                <td>@curso.HorarioInicio - @curso.HorarioFin</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@curso.Id">Ver</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
