@@ -25,8 +25,16 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 // 🔥 REDIS CACHE
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = "red-d7ki5baqqhas73blga00:6379";
-    options.InstanceName = "PortalUni_";
+    var redis = builder.Configuration["Redis__ConnectionString"];
+
+    if (!string.IsNullOrEmpty(redis))
+    {
+        options.Configuration = redis;
+    }
+    else
+    {
+        options.Configuration = "localhost:6379"; // fallback
+    }
 });
 
 // 🔥 SESIONES

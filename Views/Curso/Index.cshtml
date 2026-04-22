@@ -1,36 +1,142 @@
 @model IEnumerable<Pc2_Pogramacion.Models.Curso>
 
-<h2>Catálogo de Cursos</h2>
+<style>
+    .curso-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: #ffffff;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        padding: 32px;
+    }
 
-<form method="get">
-    <input type="text" name="nombre" placeholder="Nombre" />
+    .curso-title {
+        color: #1a1f36;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid #e4e6ef;
+    }
 
-    <input type="number" name="minCreditos" placeholder="Créditos mín" />
-    <input type="number" name="maxCreditos" placeholder="Créditos máx" />
+    .curso-form {
+        background: #f8f9fc;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 28px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        border: 1px solid #e4e6ef;
+    }
 
-    <button type="submit">Filtrar</button>
-</form>
+    .curso-form input {
+        flex: 1;
+        min-width: 150px;
+        padding: 10px 14px;
+        border: 1px solid #cbd5e0;
+        border-radius: 8px;
+    }
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Créditos</th>
-            <th>Horario</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var curso in Model)
-        {
-            <tr>
-                <td>@curso.Nombre</td>
-                <td>@curso.Creditos</td>
-                <td>@curso.HorarioInicio - @curso.HorarioFin</td>
-                <td>
-                    <a asp-action="Details" asp-route-id="@curso.Id">Ver</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    .curso-form button {
+        background: #2c5f2d;
+        color: white;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+    .curso-form button:hover {
+        background: #1e4520;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e4e6ef;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table th {
+        padding: 14px;
+        background: #f8f9fc;
+        font-size: 13px;
+    }
+
+    .table td {
+        padding: 14px;
+        border-bottom: 1px solid #edf2f7;
+    }
+
+    .btn-ver {
+        background: #ecfdf5;
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #2c5f2d;
+    }
+
+    .btn-ver:hover {
+        background: #2c5f2d;
+        color: white;
+    }
+</style>
+
+<div class="curso-container">
+    <h2 class="curso-title">Catálogo de Cursos</h2>
+
+    <form method="get" class="curso-form">
+        <input type="text" name="nombre" placeholder="Nombre" value="@Context.Request.Query["nombre"]" />
+
+        <input type="number" name="minCreditos" placeholder="Créditos mín" value="@Context.Request.Query["minCreditos"]" />
+
+        <input type="number" name="maxCreditos" placeholder="Créditos máx" value="@Context.Request.Query["maxCreditos"]" />
+
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Créditos</th>
+                    <th>Horario</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var curso in Model)
+                    {
+                        <tr>
+                            <td>@curso.Nombre</td>
+                            <td>@curso.Creditos</td>
+                            <td>@curso.HorarioInicio.ToString("HH:mm") - @curso.HorarioFin.ToString("HH:mm")</td>
+                            <td>
+                                <a asp-action="Details" asp-route-id="@curso.Id" class="btn-ver">
+                                    Ver
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" style="text-align:center; padding:30px; color:#888;">
+                            No hay cursos disponibles
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

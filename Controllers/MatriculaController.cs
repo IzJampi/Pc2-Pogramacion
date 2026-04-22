@@ -7,7 +7,7 @@ using Pc2_Pogramacion.Models;
 
 namespace Pc2_Pogramacion.Controllers
 {
-    [Authorize] // 🔥 obligatorio: usuario autenticado
+    [Authorize]
     public class MatriculaController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,6 +19,20 @@ namespace Pc2_Pogramacion.Controllers
             _userManager = userManager;
         }
 
+        // 🔥 LISTAR MIS MATRÍCULAS
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var matriculas = await _context.Matriculas
+                .Include(m => m.Curso)
+                .Where(m => m.UsuarioId == user.Id)
+                .ToListAsync();
+
+            return View(matriculas);
+        }
+
+        // 🔥 INSCRIBIRSE
         [HttpPost]
         public async Task<IActionResult> Inscribirse(int cursoId)
         {

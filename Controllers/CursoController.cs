@@ -20,46 +20,62 @@ namespace Pc2_Pogramacion.Controllers
 
         // 🔹 CATÁLOGO + CACHE REDIS (60s)
         public async Task<IActionResult> Index(string nombre, int? minCreditos, int? maxCreditos)
+{
+    string cacheKey = "cursos_activos";
+    List<Curso> cursos;
+
+    string cacheData = null;
+
+    try
+    {
+        cacheData = await _cache.GetStringAsync(cacheKey);
+    }
+    catch
+    {
+        // 🔥 Redis no disponible (local) → continuar normal
+    }
+
+    if (!string.IsNullOrEmpty(cacheData))
+    {
+        cursos = JsonSerializer.Deserialize<List<Curso>>(cacheData);
+    }
+    else
+    {
+        cursos = await _context.Cursos
+            .Where(c => c.Activo)
+            .ToListAsync();
+
+        var options = new DistributedCacheEntryOptions
         {
-            string cacheKey = "cursos_activos";
-            List<Curso> cursos;
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+        };
 
-            var cacheData = await _cache.GetStringAsync(cacheKey);
-
-            if (cacheData != null)
-            {
-                cursos = JsonSerializer.Deserialize<List<Curso>>(cacheData);
-            }
-            else
-            {
-                cursos = await _context.Cursos
-                    .Where(c => c.Activo)
-                    .ToListAsync();
-
-                var options = new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
-                };
-
-                await _cache.SetStringAsync(
-                    cacheKey,
-                    JsonSerializer.Serialize(cursos),
-                    options
-                );
-            }
-
-            // 🔹 FILTROS
-            if (!string.IsNullOrEmpty(nombre))
-                cursos = cursos.Where(c => c.Nombre.Contains(nombre)).ToList();
-
-            if (minCreditos.HasValue)
-                cursos = cursos.Where(c => c.Creditos >= minCreditos).ToList();
-
-            if (maxCreditos.HasValue)
-                cursos = cursos.Where(c => c.Creditos <= maxCreditos).ToList();
-
-            return View(cursos);
+        try
+        {
+            await _cache.SetStringAsync(
+                cacheKey,
+                JsonSerializer.Serialize(cursos),
+                options
+            );
         }
+        catch
+        {
+            // 🔥 ignora si Redis falla
+        }
+    }
+
+    // 🔹 FILTROS
+    if (!string.IsNullOrEmpty(nombre))
+        cursos = cursos.Where(c => c.Nombre.Contains(nombre)).ToList();
+
+    if (minCreditos.HasValue)
+        cursos = cursos.Where(c => c.Creditos >= minCreditos).ToList();
+
+    if (maxCreditos.HasValue)
+        cursos = cursos.Where(c => c.Creditos <= maxCreditos).ToList();
+
+    return View(cursos);
+}
 
         // 🔹 DETALLE + SESIÓN
         public async Task<IActionResult> Details(int id)
@@ -98,7 +114,14 @@ namespace Pc2_Pogramacion.Controllers
                 await _context.SaveChangesAsync();
 
                 // 🔥 INVALIDAR CACHE
-                await _cache.RemoveAsync("cursos_activos");
+                try
+            {
+                 await _cache.RemoveAsync("cursos_activos");
+            }
+            catch
+            {
+                // ignora si Redis no está disponible
+            }
 
                 return RedirectToAction(nameof(Index));
             }
@@ -135,7 +158,14 @@ namespace Pc2_Pogramacion.Controllers
                     await _context.SaveChangesAsync();
 
                     // 🔥 INVALIDAR CACHE
-                    await _cache.RemoveAsync("cursos_activos");
+                   try
+                    {
+                         await _cache.RemoveAsync("cursos_activos");
+                    }
+                catch
+                {
+                   // ignora si Redis no está disponible
+                }
                 }
                 catch (DbUpdateConcurrencyException)
                 {

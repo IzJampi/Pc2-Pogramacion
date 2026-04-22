@@ -1,23 +1,91 @@
 @model IEnumerable<Pc2_Pogramacion.Models.Matricula>
 
-<h2>Matrículas</h2>
+<div class="container">
+    <div class="header-section">
+        <h2>Gestión de Matrículas</h2>
 
-<table class="table">
-    <tr>
-        <th>Usuario</th>
-        <th>Estado</th>
-        <th>Acciones</th>
-    </tr>
+        <a asp-controller="Curso" asp-action="Index" class="back-button">
+            ← Volver a Cursos
+        </a>
+    </div>
 
-@foreach (var m in Model)
-{
-    <tr>
-        <td>@m.UsuarioId</td>
-        <td>@m.Estado</td>
-        <td>
-            <a asp-action="Confirmar" asp-route-id="@m.Id">Confirmar</a> |
-            <a asp-action="Cancelar" asp-route-id="@m.Id">Cancelar</a>
-        </td>
-    </tr>
-}
-</table>
+    <div class="table-wrapper">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var m in Model)
+                    {
+                        string estadoClass = "estado-default";
+
+                        switch (m.Estado)
+                        {
+                            case Pc2_Pogramacion.Models.EstadoMatricula.Confirmada:
+                                estadoClass = "estado-confirmado";
+                                break;
+
+                            case Pc2_Pogramacion.Models.EstadoMatricula.Cancelada:
+                                estadoClass = "estado-cancelado";
+                                break;
+
+                            case Pc2_Pogramacion.Models.EstadoMatricula.Pendiente:
+                                estadoClass = "estado-pendiente";
+                                break;
+                        }
+
+                        string inicial = m.UsuarioId != null
+                            ? m.UsuarioId.Substring(0, 1).ToUpper()
+                            : "U";
+
+                        <tr>
+                            <td>
+                                <div class="usuario-info">
+                                    <div class="avatar">@inicial</div>
+                                    <span>@m.UsuarioId</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="estado-badge @estadoClass">
+                                    @m.Estado
+                                </span>
+                            </td>
+
+                            <td class="acciones">
+                                <a asp-action="Confirmar"
+                                   asp-route-id="@m.Id"
+                                   class="btn-link btn-confirmar">
+                                    ✓ Confirmar
+                                </a>
+
+                                <span class="separator">|</span>
+
+                                <a asp-action="Cancelar"
+                                   asp-route-id="@m.Id"
+                                   class="btn-link btn-cancelar">
+                                    ✗ Cancelar
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="empty-message">
+                            No hay matrículas registradas
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
