@@ -1,0 +1,255 @@
+@model IEnumerable<Pc2_Pogramacion.Models.Curso>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel del Coordinador</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, -apple-system, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 40px 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+            overflow: hidden;
+            padding: 32px;
+            transition: all 0.2s ease;
+        }
+
+        /* Header section */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        h2 {
+            color: #1a1f36;
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin: 0;
+            padding: 0;
+        }
+
+        .btn-success {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #2c5f2d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-success:hover {
+            background: #1e4520;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(44, 95, 45, 0.15);
+        }
+
+        /* Tabla profesional */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e4e6ef;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 14px;
+        }
+
+        .table thead tr {
+            background: #f8f9fc;
+            border-bottom: 1px solid #e4e6ef;
+        }
+
+        .table th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .table td {
+            padding: 16px;
+            border-bottom: 1px solid #edf2f7;
+            color: #2d3748;
+        }
+
+        .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: #fafbff;
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Enlaces de acciones */
+        .acciones {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-link {
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .btn-link:hover {
+            color: #2c5f2d;
+            background-color: #f0f3f8;
+        }
+
+        .btn-link-primary {
+            color: #2c5f2d;
+        }
+
+        .separator {
+            color: #cbd5e0;
+            font-size: 12px;
+        }
+
+        /* Empty state */
+        .empty-message {
+            text-align: center;
+            padding: 48px 24px;
+            color: #a0aec0;
+            font-size: 14px;
+            background: #fafbfc;
+            border-radius: 12px;
+        }
+
+        /* Badge para conteo opcional */
+        .badge {
+            display: inline-block;
+            background: #edf2f7;
+            color: #4a5568;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-left: 8px;
+        }
+
+        /* Responsive */
+        @@media (max-width: 640px) {
+            body {
+                padding: 20px 16px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .table th, 
+            .table td {
+                padding: 12px;
+            }
+
+            .acciones {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .separator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-section">
+            <h2>Panel del Coordinador</h2>
+            <a asp-controller="Curso" asp-action="Create" class="btn-success">
+                <span>+</span> Crear Curso
+            </a>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nombre del curso</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @c.Nombre
+                                    <span class="badge">Activo</span>
+                                </td>
+                                <td class="acciones">
+                                    <a asp-controller="Curso" asp-action="Edit" asp-route-id="@c.Id" class="btn-link">Editar</a>
+                                    <span class="separator">|</span>
+                                    <a asp-action="Matriculas" asp-route-cursoId="@c.Id" class="btn-link btn-link-primary">Ver Matrículas</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="empty-message">
+                                No hay cursos registrados
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

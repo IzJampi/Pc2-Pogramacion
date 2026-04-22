@@ -1,0 +1,30 @@
+@model Pc2_Pogramacion.Models.Curso
+
+<h2>@Model.Nombre</h2>
+
+<p><strong>Código:</strong> @Model.Codigo</p>
+<p><strong>Créditos:</strong> @Model.Creditos</p>
+<p><strong>Cupo máximo:</strong> @Model.CupoMaximo</p>
+<p><strong>Horario:</strong> @Model.HorarioInicio - @Model.HorarioFin</p>
+
+<hr />
+
+<!-- 🔹 BOTÓN INSCRIBIRSE -->
+<form asp-controller="Matricula" asp-action="Inscribirse" method="post">
+    <input type="hidden" name="cursoId" value="@Model.Id" />
+    <button type="submit" class="btn btn-primary">Inscribirse</button>
+</form>
+
+<br />
+
+<!-- 🔹 MENSAJES -->
+@if (TempData["Mensaje"] != null)
+{
+    <div class="alert alert-info">
+        @TempData["Mensaje"]
+    </div>
+}
+
+<br />
+
+<a asp-action="Index">Volver al catálogo</a>
