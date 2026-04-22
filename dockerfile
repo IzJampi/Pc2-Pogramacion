@@ -22,4 +22,4 @@ ENV ASPNETCORE_URLS=http://+:8080
 
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "Pc2_Pogramacion.dll"]
+ENTRYPOINT ["dotnet", "Pc2-Pogramacion.dll"]
