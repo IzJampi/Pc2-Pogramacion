@@ -25,16 +25,20 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 // 🔥 REDIS CACHE
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    var redis = builder.Configuration["Redis__ConnectionString"];
+var redis = builder.Configuration["Redis__ConnectionString"];
 
-    if (!string.IsNullOrEmpty(redis))
+if (!string.IsNullOrEmpty(redis))
+{
+    builder.Services.AddStackExchangeRedisCache(options =>
     {
         options.Configuration = redis;
-    }
-    else
-    {
-        options.Configuration = "localhost:6379"; // fallback
-    }
+    });
+}
+else
+{
+    // 🔥 fallback a memoria (NO rompe la app)
+    builder.Services.AddDistributedMemoryCache();
+}
 });
 
 // 🔥 SESIONES
