@@ -1,0 +1,74 @@
+# =====================
+# 🔵 .NET
+# =====================
+bin/
+obj/
+out/
+publish/
+*.user
+*.suo
+*.cache
+*.pdb
+*.mdb
+
+# Rider / VSCode / Visual Studio
+.idea/
+.vs/
+.vscode/
+*.DotSettings.user
+
+# ASP.NET Core
+appsettings.Development.json
+
+# Logs y temporales
+logs/
+*.log
+*.logs
+crash-report/
+error-reports/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+*.snupkg
+nuget_packages/
+
+# =====================
+# 🔵 EntityFramework / DB local
+# (no subas tu base local si la tienes)
+# =====================
+*.db
+*.sqlite
+*.sqlite3
+
+# =====================
+# 🔵 Secrets / Config NO subir
+# =====================
+appsettings.json
+
+# =====================
+# 🔵 Compilación / Publicación
+# =====================
+_wwwroot/
+wwwroot/
+*.min.js
+*.min.css
+
+# =====================
+# 🔵 Testing
+# =====================
+TestResults/
+*.trx
+
+# =====================
+# 🔵 Docker (si lo usas en el futuro)
+# =====================
+docker-compose.override.yml
+
+# =====================
+# 🔵 Otros
+# =====================
+.env
