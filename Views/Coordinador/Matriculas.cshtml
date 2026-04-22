@@ -1,0 +1,23 @@
+@model IEnumerable<Pc2_Pogramacion.Models.Matricula>
+
+<h2>Matrículas</h2>
+
+<table class="table">
+    <tr>
+        <th>Usuario</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+    </tr>
+
+@foreach (var m in Model)
+{
+    <tr>
+        <td>@m.UsuarioId</td>
+        <td>@m.Estado</td>
+        <td>
+            <a asp-action="Confirmar" asp-route-id="@m.Id">Confirmar</a> |
+            <a asp-action="Cancelar" asp-route-id="@m.Id">Cancelar</a>
+        </td>
+    </tr>
+}
+</table>

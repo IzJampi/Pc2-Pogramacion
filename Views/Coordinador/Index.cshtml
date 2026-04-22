@@ -1,0 +1,23 @@
+@model IEnumerable<Pc2_Pogramacion.Models.Curso>
+
+<h2>Panel Coordinador</h2>
+
+<a asp-controller="Curso" asp-action="Create" class="btn btn-success">Crear Curso</a>
+
+<table class="table">
+    <tr>
+        <th>Nombre</th>
+        <th>Acciones</th>
+    </tr>
+
+@foreach (var c in Model)
+{
+    <tr>
+        <td>@c.Nombre</td>
+        <td>
+            <a asp-controller="Curso" asp-action="Edit" asp-route-id="@c.Id">Editar</a> |
+            <a asp-action="Matriculas" asp-route-cursoId="@c.Id">Ver Matrículas</a>
+        </td>
+    </tr>
+}
+</table>
