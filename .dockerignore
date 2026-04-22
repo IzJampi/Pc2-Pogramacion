@@ -1,0 +1,14 @@
+.vs/
+bin/
+obj/
+node_modules/
+.git/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.cache
+*.log
+publish/
+Dockerfile
+dockerfile
