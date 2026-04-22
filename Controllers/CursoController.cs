@@ -1,43 +1,77 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Pc2_Pogramacion.Data;
 using Pc2_Pogramacion.Models;
+using System.Text.Json;
 
 namespace Pc2_Pogramacion.Controllers
 {
     public class CursoController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IDistributedCache _cache;
 
-        public CursoController(ApplicationDbContext context)
+        public CursoController(ApplicationDbContext context, IDistributedCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
-        // 🔹 CATÁLOGO + FILTROS
+        // 🔹 CATÁLOGO + CACHE REDIS (60s)
         public async Task<IActionResult> Index(string nombre, int? minCreditos, int? maxCreditos)
         {
-            var cursos = _context.Cursos.Where(c => c.Activo);
+            string cacheKey = "cursos_activos";
+            List<Curso> cursos;
 
+            var cacheData = await _cache.GetStringAsync(cacheKey);
+
+            if (cacheData != null)
+            {
+                cursos = JsonSerializer.Deserialize<List<Curso>>(cacheData);
+            }
+            else
+            {
+                cursos = await _context.Cursos
+                    .Where(c => c.Activo)
+                    .ToListAsync();
+
+                var options = new DistributedCacheEntryOptions
+                {
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(60)
+                };
+
+                await _cache.SetStringAsync(
+                    cacheKey,
+                    JsonSerializer.Serialize(cursos),
+                    options
+                );
+            }
+
+            // 🔹 FILTROS
             if (!string.IsNullOrEmpty(nombre))
-                cursos = cursos.Where(c => c.Nombre.Contains(nombre));
+                cursos = cursos.Where(c => c.Nombre.Contains(nombre)).ToList();
 
             if (minCreditos.HasValue)
-                cursos = cursos.Where(c => c.Creditos >= minCreditos);
+                cursos = cursos.Where(c => c.Creditos >= minCreditos).ToList();
 
             if (maxCreditos.HasValue)
-                cursos = cursos.Where(c => c.Creditos <= maxCreditos);
+                cursos = cursos.Where(c => c.Creditos <= maxCreditos).ToList();
 
-            return View(await cursos.ToListAsync());
+            return View(cursos);
         }
 
-        // 🔹 DETALLE
+        // 🔹 DETALLE + SESIÓN
         public async Task<IActionResult> Details(int id)
         {
             var curso = await _context.Cursos
                 .FirstOrDefaultAsync(c => c.Id == id);
 
             if (curso == null) return NotFound();
+
+            // 🔥 GUARDAR EN SESIÓN
+            HttpContext.Session.SetString("UltimoCursoNombre", curso.Nombre);
+            HttpContext.Session.SetInt32("UltimoCursoId", curso.Id);
 
             return View(curso);
         }
@@ -53,7 +87,6 @@ namespace Pc2_Pogramacion.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Curso curso)
         {
-            // 🔥 VALIDACIÓN SERVER-SIDE
             if (curso.HorarioFin <= curso.HorarioInicio)
             {
                 ModelState.AddModelError("", "El horario es inválido");
@@ -63,6 +96,10 @@ namespace Pc2_Pogramacion.Controllers
             {
                 _context.Add(curso);
                 await _context.SaveChangesAsync();
+
+                // 🔥 INVALIDAR CACHE
+                await _cache.RemoveAsync("cursos_activos");
+
                 return RedirectToAction(nameof(Index));
             }
 
@@ -85,7 +122,6 @@ namespace Pc2_Pogramacion.Controllers
         {
             if (id != curso.Id) return NotFound();
 
-            // 🔥 VALIDACIÓN SERVER-SIDE
             if (curso.HorarioFin <= curso.HorarioInicio)
             {
                 ModelState.AddModelError("", "El horario es inválido");
@@ -97,6 +133,9 @@ namespace Pc2_Pogramacion.Controllers
                 {
                     _context.Update(curso);
                     await _context.SaveChangesAsync();
+
+                    // 🔥 INVALIDAR CACHE
+                    await _cache.RemoveAsync("cursos_activos");
                 }
                 catch (DbUpdateConcurrencyException)
                 {

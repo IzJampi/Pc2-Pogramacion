@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
 using Pc2_Pogramacion.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,10 +17,23 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 // 🔹 IDENTITY + ROLES
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false; // más simple para pruebas
+    options.SignIn.RequireConfirmedAccount = false;
 })
-.AddRoles<IdentityRole>() // 🔥 IMPORTANTE
+.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// 🔥 REDIS CACHE
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "red-d7ki5baqqhas73blga00:6379";
+    options.InstanceName = "PortalUni_";
+});
+
+// 🔥 SESIONES
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+});
 
 builder.Services.AddControllersWithViews();
 
@@ -39,7 +53,10 @@ else
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthentication(); // 🔥 IMPORTANTE
+// 🔥 SESIÓN (ANTES de Auth)
+app.UseSession();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
